@@ -386,7 +386,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 PERMISSION_CODE
             )
         }
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+      else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.title)
