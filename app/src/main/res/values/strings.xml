@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">AppSensors</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="value_1">0.00</string>
+    <string name="value_2">0.00</string>
+    <string name="value_3">0.00</string>
+    <string name="gyroscope">Gyroscope</string>
+    <string name="magnetometer">Magnetometer</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="timestamp">TimeStamp</string>
+    <string name="startScanning">START SCAN</string>
+    <string name="download">Download</string>
+    <string name="stopScanning">STOP SCAN</string>
+    <string name="device_name">device name</string>
+    <string name="device_address">device Address</string>
+    <string name="connect">CONNECT</string>
+    <string name="rssi">RSSI</string>
+    <string name="title">Location</string>
+    <string name="message">Please, Turn on device location for scanning near by BLE devices.</string>
+    <string name="cancel"> cancel </string>
+    <string name="decline">decline</string>
+    <string name="accept">Turn On</string>
+    <string name="_00">00</string>
+    <string name="_00000000">00000000</string>
+</resources>
