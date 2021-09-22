@@ -1,9 +1,9 @@
 package com.example.appsensors
 
 data class Model (
-    var accelerometer:Accelerometer,
-    var gyroscope:Gyroscope,
-    var magnetometer:Magnetometer,
+    var accelerometer:MutableSet<Accelerometer>,
+    var gyroscope:MutableSet<Gyroscope>,
+    var magnetometer:MutableSet<Magnetometer>,
     var bleDevices:MutableSet<ListOfBleDiscovered>
 )
 
