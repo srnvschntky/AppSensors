@@ -11,12 +11,13 @@ import kotlinx.android.synthetic.main.ble_list_adapter.view.*
 
 class BleListAdapter: RecyclerView.Adapter<BleListAdapter.ViewHolder>() {
 
-    private val scanResultList:MutableSet<ScanResult> = mutableSetOf()
+    private var scanResultList:MutableSet<ScanResult> = mutableSetOf()
 
 
     fun receiveResult(results:MutableSet<ScanResult>) {
         this.scanResultList.clear()
         this.scanResultList.addAll(results)
+        this.scanResultList = this.scanResultList.sortedBy { it.rssi }.reversed().toMutableSet()
         notifyDataSetChanged()
 
     }
