@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
     private var listOfBleDiscovered: MutableSet<ListOfBleDiscovered> = mutableSetOf()
+    private var magnetometerResultSet: MutableSet<Magnetometer> = mutableSetOf()
+    private var accelerometerResultSet: MutableSet<Accelerometer> = mutableSetOf()
+    private var gyroscopeResultSet: MutableSet<Gyroscope> = mutableSetOf()
     private var scanResultSet: MutableSet<ScanResult> = mutableSetOf()
     private var mAccelerometer: Sensor? = null
     private var mGyroscope: Sensor? = null
@@ -126,7 +129,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 listOfBleDiscovered.add(obj)
             }
         }
-        objModel = Model(objAccelerometer, objGyroscope, objMagnetometer, listOfBleDiscovered)
+        objModel = Model(accelerometerResultSet, gyroscopeResultSet, magnetometerResultSet, listOfBleDiscovered)
         objGson = Gson()
         val gsonString = objGson.toJson(objModel)
         val shareIntent = Intent().apply {
@@ -149,6 +152,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 ) {
                     locationPermissions()
                 } else {
+                    magnetometerResultSet.clear()
+                    gyroscopeResultSet.clear()
+                    accelerometerResultSet.clear()
                     scanResultSet.clear()
                     listOfBleDiscovered.clear()
                     leDeviceListAdapter.receiveResult(scanResultSet)
@@ -158,6 +164,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             } else {
                 scanning = false
+                disableSensors()
                 bluetoothLeScanner.stopScan(leScanCallback)
                 progress_Linear.visibility = View.GONE
                 startScan.text = getString(R.string.startScanning)
@@ -280,15 +287,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        mAccelerometer?.also { light ->
-            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-        mGyroscope?.also { light ->
-            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-        mMagnetometer?.also { light ->
-            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
-        }
+
 
     }
 
@@ -306,15 +305,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         scanning = false
+        disableSensors()
         bluetoothLeScanner.stopScan(leScanCallback)
         progress_Linear.visibility = View.GONE
         startScan.text = getString(R.string.startScanning)
-        sensorManager.unregisterListener(this)
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
         scanning = false
+        disableSensors()
         bluetoothLeScanner.stopScan(leScanCallback)
         progress_Linear.visibility = View.GONE
         startScan.text = getString(R.string.startScanning)
@@ -338,6 +339,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             event.accuracy,
             event.timestamp
         )
+        accelerometerResultSet.add(objAccelerometer)
 
 
     }
@@ -356,6 +358,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             event.accuracy,
             event.timestamp
         )
+        gyroscopeResultSet.add(objGyroscope)
 
 
     }
@@ -373,6 +376,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             event.accuracy,
             event.timestamp
         )
+        magnetometerResultSet.add(objMagnetometer)
 
 
     }
@@ -385,8 +389,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 PERMISSION_CODE
             )
-        }
-      else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        }else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.title)
@@ -425,17 +428,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
 
+
     }
 
 
     private fun sendScanResultToPopulate(result: ScanResult) {
         val mAddress = result.device.address.toString()
+        var count:Int? = null
         if (scanResultSet.size > 0) {
             var flag = false
             for (i in 0 until scanResultSet.size) {
                 val srs = scanResultSet.elementAt(i).device.address.toString()
                 if (srs == mAddress) {
                     flag = true
+                    val list:MutableList<ScanResult> = scanResultSet.toMutableList()
+                    list[i] = result
+                    scanResultSet.clear()
+                    scanResultSet = list.toMutableSet()
                 }
             }
             if (!flag) {
@@ -454,7 +463,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
         scanResultSet.sortedBy { it.rssi }
-        scanResultSet.reversed()
+//        scanResultSet.reversed()
         Log.i("TAG_rssi", "$scanResultSet")
         leDeviceListAdapter.receiveResult(scanResultSet)
         leDeviceListAdapter.notifyDataSetChanged()
@@ -464,15 +473,34 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun scanLeDevice() {
         if (!scanning) {
             scanning = true
+            enableSensors()
             progress_Linear.visibility = View.VISIBLE
             startScan.text = getString(R.string.stopScanning)
             bluetoothLeScanner.startScan(leScanCallback)
         } else {
             scanning = false
+            disableSensors()
             bluetoothLeScanner.stopScan(leScanCallback)
             progress_Linear.visibility = View.GONE
             startScan.text = getString(R.string.startScanning)
         }
+    }
+
+    private fun enableSensors(){
+        mAccelerometer?.also { light ->
+            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        mGyroscope?.also { light ->
+            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        mMagnetometer?.also { light ->
+            sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+
+    }
+
+    private fun disableSensors(){
+        sensorManager.unregisterListener(this)
     }
 
 
